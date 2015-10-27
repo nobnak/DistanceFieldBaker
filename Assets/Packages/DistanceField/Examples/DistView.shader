@@ -6,8 +6,8 @@
 		_Filter ("Filter", Vector) = (1, 1, 1, 1)
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" "Queue"="Overlay" }
-		LOD 100 ZTest Always ZWrite Off Cull Off
+		Tags { "RenderType"="Opaque" }
+		LOD 100 ZTest LEqual ZWrite On Cull Off
 
 		Pass {
 			CGPROGRAM

@@ -18,10 +18,12 @@ namespace DistanceFieldSystem {
 		Renderer _renderer;
 		MaterialPropertyBlock _props;
 
-		public void FitAspect() {
-			var s = transform.localScale;
-			s.x = s.y * targetCamera.aspect;
-			transform.localScale = s;
+		public void FitCamera() {
+			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - Mathf.Epsilon);
+			transform.position = targetCamera.ViewportToWorldPoint (posViewport);
+			transform.rotation = targetCamera.transform.rotation;
+			var size = 2f * targetCamera.orthographicSize;
+			transform.localScale = new Vector3 (size * targetCamera.aspect, size, 1f);
 		}
 
 		void Start() {

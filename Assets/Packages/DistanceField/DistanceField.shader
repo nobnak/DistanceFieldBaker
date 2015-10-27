@@ -3,6 +3,7 @@
 	Properties {
 		PointCount ("Point Count", Int) = 0
 		ScreenSize ("Screen Size", Vector) = (0, 0, 0, 0)
+		_DistTex ("Dist Texture", 2D) = "white" {}
 	}
 	SubShader {
 		// No culling or depth
@@ -12,9 +13,12 @@
 			#pragma target 5.0			
 			#include "UnityCG.cginc"
 			
-			#ifdef SHADER_API_D3D11
-			uint PointCount;
+			sampler2D _DistTex;
+			sampler2D _NormTex;
+			float4 _DistTex_ST;
 			float4 ScreenSize;
+			uint PointCount;
+			#ifdef SHADER_API_D3D11
 			StructuredBuffer<float2> PointBuf;
 			#endif
 
@@ -71,8 +75,8 @@
 			#pragma fragment frag
 			
 			float4 frag (v2f IN) : SV_Target {
-				float2 c = tex2d(_DistTex, IN.uv);
-				float2 n = normalize(float2(ddx(c.y), ddy(d.y)));
+				float2 c = tex2D(_DistTex, IN.uv).xy;
+				float2 n = normalize(float2(ddx(c.y), ddy(c.y)));
 				return float4(n, 0, 1);
 			}
 			ENDCG

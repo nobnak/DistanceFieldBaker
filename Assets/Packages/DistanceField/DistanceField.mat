@@ -22,13 +22,20 @@ Material:
           m_Texture: {fileID: 0}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _DistTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
     m_Floats:
       data:
         first:
           name: PointCount
-        second: 64
+        second: 10
     m_Colors:
       data:
         first:
           name: ScreenSize
-        second: {r: 1503, g: 862, b: .000665335974, a: .00116009277}
+        second: {r: 1148, g: 695, b: .000871080148, a: .00143884891}

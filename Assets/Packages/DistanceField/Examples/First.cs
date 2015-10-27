@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace DistanceFieldSystem {
@@ -25,7 +25,7 @@ namespace DistanceFieldSystem {
 			distField.points = _points;
 		}
 		void Update() {
-			distField.FitAspect();
+			distField.FitCamera();
 			transform.localRotation *= Quaternion.Euler(angularVelocity * Time.deltaTime);
 		}
 	}
