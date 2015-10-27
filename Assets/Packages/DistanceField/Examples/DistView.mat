@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: DistView
+  m_Shader: {fileID: 4800000, guid: a7d06dcc1b5166149b29433117d34b76, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  m_SavedProperties:
+    serializedVersion: 2
+    m_TexEnvs:
+      data:
+        first:
+          name: _MainTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _DistTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _NormTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+    m_Floats:
+      data:
+        first:
+          name: _Mod
+        second: 24.4099998
+      data:
+        first:
+          name: _Steps
+        second: 16
+    m_Colors:
+      data:
+        first:
+          name: _Scale
+        second: {r: .0399999991, g: 1000, b: 0, a: 0}
+      data:
+        first:
+          name: _Scaler
+        second: {r: 0, g: .00999999978, b: 0, a: 0}
+      data:
+        first:
+          name: _Filter
+        second: {r: 1, g: 1, b: 0, a: 0}
