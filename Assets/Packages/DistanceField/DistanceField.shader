@@ -9,6 +9,9 @@
 		Cull Off ZWrite Off ZTest Always
 
 			CGINCLUDE
+			#pragma target 5.0			
+			#include "UnityCG.cginc"
+			
 			#ifdef SHADER_API_D3D11
 			uint PointCount;
 			float4 ScreenSize;
@@ -21,13 +24,15 @@
 			};
 
 			struct v2f {
-				float2 posPixel : TEXCOORD0;
+				float2 uv : TEXCOORD0;
+				float2 posPixel : TEXCOORD1;
 				float4 vertex : SV_POSITION;
 			};
 
 			v2f vert (appdata v) {
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.uv = v.uv;
 				o.posPixel = v.uv * ScreenSize.xy;
 				return o;
 			}
@@ -35,11 +40,8 @@
 
 		Pass {
 			CGPROGRAM
-			#pragma target 5.0
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#include "UnityCG.cginc"
 			
 			float4 frag (v2f IN) : SV_Target {
 				float4 d = 0;
@@ -65,18 +67,13 @@
 		
 		Pass {
 			CGPROGRAM
-			#pragma target 5.0
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			#include "UnityCG.cginc"
-			
 			float4 frag (v2f IN) : SV_Target {
-				float4 d = 0;
-				#ifdef SHADER_API_D3D11
-				
-				#endif
-				return d;
+				float2 c = tex2d(_DistTex, IN.uv);
+				float2 n = normalize(float2(ddx(c.y), ddy(d.y)));
+				return float4(n, 0, 1);
 			}
 			ENDCG
 		}

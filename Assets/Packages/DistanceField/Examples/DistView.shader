@@ -45,8 +45,9 @@
 			}
 			
 			float4 frag (v2f i) : SV_Target {
-				float4 c = tex2D(_DistTex, i.uv);
-				float4 d = float4(fmod(_Scale.x * c.x, 1), _Scale.y * c.y, 0, 1);
+				float4 cd = tex2D(_DistTex, i.uv);
+				float4 cn = tex2D(_NormTex, i.uv);
+				float4 d = float4(fmod(_Scale.x * cd.x, 1), _Scale.y * cd.y, 0, 1);
 				d.x = (d.x < 0.1 ? 1 : 0);
 				d.y = (d.y > 0.9 ? 1 : 0);
 				d *= _Filter;
