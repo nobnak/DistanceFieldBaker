@@ -63,9 +63,9 @@ Material:
         second: {r: .0399999991, g: 1000, b: 0, a: 0}
       data:
         first:
-          name: _Scaler
-        second: {r: 0, g: .00999999978, b: 0, a: 0}
+          name: _Filter
+        second: {r: 1, g: 1, b: 0, a: 0}
       data:
         first:
-          name: _Filter
-        second: {r: 0, g: 1, b: 0, a: 0}
+          name: _Scaler
+        second: {r: 0, g: .00999999978, b: 0, a: 0}

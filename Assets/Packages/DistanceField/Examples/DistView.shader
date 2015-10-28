@@ -52,14 +52,15 @@
 				
 				d += _Filter.y * cd;
 				
-				float2 v = normalize(2 * (cn - 0.5)) * _NoiseTex_TexelSize.xy;
+				float2 n = normalize(2 * (cn - 0.5)) * _NoiseTex_TexelSize.xy;
+				float2 v = float2(-n.y, n.x);
 				float2 uv = i.uv;
 				float3 cl = tex2D(_NoiseTex, uv).xyz;
 				for (uint i = 0; i < LOOP_COUNT; i++) {
 					cl += tex2D(_NoiseTex, uv + i * v);
 					cl += tex2D(_NoiseTex, uv - i * v);
 				}
-				d += _Filter.z * 
+				d += _Filter.z * cl / (2 * LOOP_COUNT + 1);
 				
 				return float4(d, 1);
 			}
