@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: DistanceField
   m_Shader: {fileID: 4800000, guid: 3a0054cb42520e04cb6ac5653eb67c65, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: METABALL_FIELD
   m_LightmapFlags: 5
   m_CustomRenderQueue: 2000
   stringTagMap: {}
@@ -32,10 +32,14 @@ Material:
     m_Floats:
       data:
         first:
+          name: _Scale
+        second: 1138.23816
+      data:
+        first:
           name: PointCount
-        second: 10
+        second: 40
     m_Colors:
       data:
         first:
           name: ScreenSize
-        second: {r: 1148, g: 695, b: .000871080148, a: .00143884891}
+        second: {r: 1503, g: 862, b: .000665335974, a: .00116009277}

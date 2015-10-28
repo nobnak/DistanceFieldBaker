@@ -3,20 +3,22 @@
 	Properties {
 		PointCount ("Point Count", Int) = 0
 		ScreenSize ("Screen Size", Vector) = (0, 0, 0, 0)
-		_DistTex ("Dist Texture", 2D) = "white" {}
+		_MainTex ("Main Texture", 2D) = "white" {}
+		_Scale ("Scale", Float) = 1
 	}
 	SubShader {
 		// No culling or depth
 		Cull Off ZWrite Off ZTest Always
 
 			CGINCLUDE
-			#pragma target 5.0			
+			#pragma target 5.0
+			#pragma multi_compile DISTANCE_FIELD METABALL_FIELD
 			#include "UnityCG.cginc"
 			
-			sampler2D _DistTex;
-			sampler2D _NormTex;
-			float4 _DistTex_ST;
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			float4 ScreenSize;
+			float _Scale;
 			uint PointCount;
 			#ifdef SHADER_API_D3D11
 			StructuredBuffer<float2> PointBuf;
@@ -48,23 +50,30 @@
 			#pragma fragment frag
 			
 			float4 frag (v2f IN) : SV_Target {
-				float4 d = 0;
+				float d = 0;
 				#ifdef SHADER_API_D3D11
-				float minSqrDist = dot(ScreenSize.xy, ScreenSize.xy);
-				float meta = 0;
+
+				#if defined(METABALL_FIELD)
 				for (uint i = 0; i < PointCount; i++) {
 					float2 p = PointBuf[i];
 					float2 dir = p - IN.posPixel;
 					float sqrDist = dot(dir, dir);
-					if (sqrDist < minSqrDist)
-						minSqrDist = sqrDist;
-					
-					meta += 1.0 / sqrDist;
+					d += 1.0 / sqrDist;
 				}
-				d.x = sqrt(minSqrDist);
-				d.y = meta;
+				#else
+				d = dot(ScreenSize.xy, ScreenSize.xy);
+				for (uint i = 0; i < PointCount; i++) {
+					float2 p = PointBuf[i];
+					float2 dir = p - IN.posPixel;
+					float sqrDist = dot(dir, dir);
+					if (sqrDist < d)
+						d = sqrDist;
+				}
+				d = sqrt(d);
 				#endif
-				return d;
+				
+				#endif
+				return _Scale * d;
 			}
 			ENDCG
 		}
@@ -75,9 +84,9 @@
 			#pragma fragment frag
 			
 			float4 frag (v2f IN) : SV_Target {
-				float2 c = tex2D(_DistTex, IN.uv).xy;
-				float2 n = normalize(float2(ddx(c.y), ddy(c.y)));
-				return float4(n, 0, 1);
+				float d = tex2D(_MainTex, IN.uv).x;
+				float2 n = normalize(float2(-ddx(d), -ddy(d)));
+				return float4(0.5 *n + 0.5, 0, 1);
 			}
 			ENDCG
 		}
