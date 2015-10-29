@@ -158,11 +158,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4b53fec02a9224abd0b0cdb5b81b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lod: 1
+  lod: 2
   pointCapacity: 64
   debugMode: 1
   heightMode: 1
-  viewMode: 0
+  viewMode: 3
   targetCamera: {fileID: 721048937}
   distMat: {fileID: 2100000, guid: 5a901c2c39270cc468e1746de172806a, type: 2}
   points: []

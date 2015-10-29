@@ -6,7 +6,8 @@ namespace DistanceFieldSystem {
 	public class DistanceField : MonoBehaviour {
 		public enum DebugModeEnum { Normal = 0, Debug }
 		public enum HeightModeEnum { Distance = 0, Metaball }
-		public enum ViewModeEnum { Normal = 0, Height, LIC }
+		[System.Flags]
+		public enum ViewModeEnum { Normal = 0, Height, LIC, Flow }
 		public int lod = 1;
 		public int pointCapacity = 64;
 		public DebugModeEnum debugMode;
@@ -110,6 +111,9 @@ namespace DistanceFieldSystem {
 				break;
 			case ViewModeEnum.LIC:
 				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(0, 0, 1, 0));
+				break;
+			case ViewModeEnum.Flow:
+				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(0, 0, 0, 1));
 				break;
 			default:
 				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(1, 0, 0, 0));

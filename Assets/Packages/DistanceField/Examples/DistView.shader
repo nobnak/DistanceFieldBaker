@@ -32,6 +32,7 @@
 			float4 _DistTex_ST;
 			float4 _NormTex_ST;
 			float4 _NoiseTex_ST;
+			float4 _NormTex_TexelSize;
 			float4 _NoiseTex_TexelSize;
 			float4 _Filter;
 			
@@ -52,15 +53,20 @@
 				
 				d += _Filter.y * cd;
 				
-				float2 n = normalize(2 * (cn - 0.5)) * _NoiseTex_TexelSize.xy;
-				float2 v = float2(-n.y, n.x);
-				float2 uv = i.uv;
+				float2 n = normalize(2 * (cn - 0.5));
+				float2 t = float2(-n.y, n.x);
+				float2 v = t * _NoiseTex_TexelSize.xy;
+				float2 uv = i.uv * _ScreenParams.xy * _NoiseTex_TexelSize.xy;
 				float3 cl = tex2D(_NoiseTex, uv).xyz;
 				for (uint i = 0; i < LOOP_COUNT; i++) {
 					cl += tex2D(_NoiseTex, uv + i * v);
 					cl += tex2D(_NoiseTex, uv - i * v);
 				}
-				d += _Filter.z * cl / (2 * LOOP_COUNT + 1);
+				float3 d_lic = saturate(cl / (2 * LOOP_COUNT + 1));
+				d += _Filter.z * d_lic;
+				
+				float3 d_flow = saturate(abs(t.x) * float3(1, 0, 0) + abs(t.y) * float3(0, 1, 0));
+				d += _Filter.w * lerp(d_flow, 1, cd) * d_lic;
 				
 				return float4(d, 1);
 			}
