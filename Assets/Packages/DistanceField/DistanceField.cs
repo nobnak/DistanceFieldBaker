@@ -9,6 +9,7 @@ namespace DistanceFieldSystem {
 		public enum HeightModeEnum { Distance = 0, Metaball }
 		public enum ViewModeEnum { Normal = 0, Height, LIC, Flow }
 		public enum NormalTexModeEnum { Tex2D = 0, RenderTex }
+		public enum GenerateTexModeEnum { Tangent = 0, Normal }
 
 		public Texture2DEvent OnReady;
 
@@ -19,6 +20,7 @@ namespace DistanceFieldSystem {
 		public HeightModeEnum heightMode;
 		public ViewModeEnum viewMode;
 		public NormalTexModeEnum normalTexMode;
+		public GenerateTexModeEnum generateTexMode;
 		public Camera targetCamera;
 		public Material distMat;
 		public Transform[] points;
@@ -29,14 +31,6 @@ namespace DistanceFieldSystem {
 		PointService _points;
 		Renderer _renderer;
 		MaterialPropertyBlock _viewProps;
-
-		public void FitCamera() {
-			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - Mathf.Epsilon);
-			transform.position = targetCamera.ViewportToWorldPoint (posViewport);
-			transform.rotation = targetCamera.transform.rotation;
-			var size = 2f * targetCamera.orthographicSize;
-			transform.localScale = new Vector3 (size * targetCamera.aspect, size, 1f);
-		}
 
 		void Start() {
 			_viewProps = new MaterialPropertyBlock();
@@ -105,8 +99,9 @@ namespace DistanceFieldSystem {
 			var height = targetCamera.pixelHeight;
 			m.SetVector(ShaderConsts.PROP_SCREEN_SIZE, new Vector4(width, height, 1f/width, 1f/height));
 
-			var r = Mathf.Sqrt(width * height);
 			m.shaderKeywords = null;
+
+			var r = Mathf.Sqrt(width * height);
 			switch (heightMode) {
 			case HeightModeEnum.Metaball:
 				m.EnableKeyword(ShaderConsts.KEY_FIELD_METABALL);
@@ -117,11 +112,21 @@ namespace DistanceFieldSystem {
 				m.SetFloat(ShaderConsts.PROP_DIST_SCALE, 5f / r);			
 				break;
 			}
+
+			switch (generateTexMode) {
+			case GenerateTexModeEnum.Normal:
+				m.EnableKeyword(ShaderConsts.KEY_GENERATE_NORMAL);
+				break;
+			default:
+				m.EnableKeyword(ShaderConsts.KEY_GENERATE_TANGENT);
+				break;
+			}
 		}
 		void SetViewMode() {
 			switch (debugMode) {
 			case DebugModeEnum.Debug:
 				_renderer.enabled = true;
+				FitCamera();
 				break;
 			default:
 				_renderer.enabled = false;
@@ -151,6 +156,13 @@ namespace DistanceFieldSystem {
 				_viewProps.SetTexture(ShaderConsts.PROP_NORM_TEXTURE, _normTex2D);
 				break;
 			}
+		}
+		void FitCamera() {
+			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - Mathf.Epsilon);
+			transform.position = targetCamera.ViewportToWorldPoint (posViewport);
+			transform.rotation = targetCamera.transform.rotation;
+			var size = 2f * targetCamera.orthographicSize;
+			transform.localScale = new Vector3 (size * targetCamera.aspect, size, 1f);
 		}
 		void Release() {
 			if (_distTex != null) {

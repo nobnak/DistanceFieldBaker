@@ -25,7 +25,6 @@ namespace DistanceFieldSystem {
 			distField.points = _points;
 		}
 		void Update() {
-			distField.FitCamera();
 			transform.localRotation *= Quaternion.Euler(angularVelocity * Time.deltaTime);
 		}
 	}

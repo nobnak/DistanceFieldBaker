@@ -13,6 +13,7 @@
 			CGINCLUDE
 			#pragma target 5.0
 			#pragma multi_compile DISTANCE_FIELD METABALL_FIELD
+			#pragma multi_compile GENERATE_TANGENT GENERATE_NORMAL
 			#include "UnityCG.cginc"
 			
 			sampler2D _MainTex;
@@ -86,6 +87,9 @@
 			float4 frag (v2f IN) : SV_Target {
 				float d = tex2D(_MainTex, IN.uv).x;
 				float2 n = normalize(float2(-ddx(d), -ddy(d)));
+				#if defined(GENERATE_TANGENT)
+				n = float2(-n.y, n.x);
+				#endif
 				return float4(0.5 *n + 0.5, 0, 1);
 			}
 			ENDCG

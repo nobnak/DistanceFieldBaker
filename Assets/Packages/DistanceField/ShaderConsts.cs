@@ -16,6 +16,9 @@ namespace DistanceFieldSystem {
 		public const string KEY_FIELD_DISTANCE = "DISTANCE_FIELD";
 		public const string KEY_FIELD_METABALL = "METABALL_FIELD";
 
+		public const string KEY_GENERATE_NORMAL = "GENERATE_NORMAL";
+		public const string KEY_GENERATE_TANGENT = "GENERATE_TANGENT";
+
 		public const string KEY_VIEW_HGIEHT = "HEIGHT_FIELD";
 		public const string KEY_VIEW_NORMAL = "NORMAL_FIELD";
 	}
