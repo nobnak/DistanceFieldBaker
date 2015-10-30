@@ -158,7 +158,7 @@ namespace DistanceFieldSystem {
 			}
 		}
 		void FitCamera() {
-			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - Mathf.Epsilon);
+			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - 1e-2f);
 			transform.position = targetCamera.ViewportToWorldPoint (posViewport);
 			transform.rotation = targetCamera.transform.rotation;
 			var size = 2f * targetCamera.orthographicSize;
