@@ -166,13 +166,14 @@ MonoBehaviour:
   lod: 2
   interval: 1
   pointCapacity: 64
-  debugMode: 1
+  debugMode: 0
   heightMode: 1
   viewMode: 3
   normalTexMode: 0
+  generateTexMode: 0
   targetCamera: {fileID: 721048937}
   distMat: {fileID: 2100000, guid: 5a901c2c39270cc468e1746de172806a, type: 2}
-  points: []
+  rootOfPointLeaves: {fileID: 0}
 --- !u!23 &337972139
 MeshRenderer:
   m_ObjectHideFlags: 0
