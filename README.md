@@ -1,4 +1,4 @@
-# 2D Distance Field Baker for Unity
+# GPU-based 2D Distance Field Baker for Unity
 
 Generated 2DTexture holding
 - rg : Direction from nearest point
