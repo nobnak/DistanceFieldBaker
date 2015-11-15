@@ -7,7 +7,7 @@ namespace DistanceFieldSystem {
 	public class DistanceField : MonoBehaviour {
 		public enum DebugModeEnum { Normal = 0, Debug }
 		public enum HeightModeEnum { Distance = 0, Metaball }
-		public enum ViewModeEnum { Normal = 0, Height, LIC, Flow }
+		public enum ViewModeEnum { Normal = 0, Height, Distance, Flow }
 		public enum NormalTexModeEnum { Tex2D = 0, RenderTex }
 		public enum GenerateTexModeEnum { Tangent = 0, Normal }
 
@@ -23,20 +23,46 @@ namespace DistanceFieldSystem {
 		public GenerateTexModeEnum generateTexMode;
 		public Camera targetCamera;
 		public Material distMat;
-		public Transform[] points;
+		public Transform rootOfPointLeaves;
 
+		MaterialPropertyBlock _viewProps;
 		RenderTexture _distTex;
 		RenderTexture _normTex;
-		Texture2D _normTex2D;
 		PointService _points;
+		Texture2D _normTex2D;
 		Renderer _renderer;
-		MaterialPropertyBlock _viewProps;
+		float _dx_dpx;
+
+		public Transform[] PointData { get; private set; }
+
+		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flow, out float distanceWorld) {
+			if (_normTex2D == null) {
+				flow = default(Vector2);
+				distanceWorld = default(float);
+				return false;
+			}
+			var flowColor = _normTex2D.GetPixelBilinear(posViewport.x, posViewport.y);
+			flow = new Vector2(2f * (flowColor.r - 0.5f), 2f * (flowColor.g - 0.5f));
+			flow.Normalize();
+			distanceWorld = (255f * flowColor.a) * _dx_dpx;
+			return true;
+		}
+		public bool FlowAtWorldPos(Vector2 posWorld, out Vector2 flow, out float distanceWorld) {
+			var posViewport = targetCamera.WorldToViewportPoint(posWorld);
+			if (!FlowAtViewportPos(posViewport, out flow, out distanceWorld))
+				return false;
+			return (0f <= posViewport.x && posViewport.x <= 1f && 0f < posViewport.y && posViewport.y <= 1f);
+		}
+		public void UpdatePoints() { PointData = GeneratePoints(rootOfPointLeaves); }
+		public static Vector2 RotateRight(Vector2 t) { return new Vector2(t.y, -t.x); }
+		public static Vector2 RotateLeft(Vector2 n) { return new Vector2(-n.y, n.x); }
 
 		void Start() {
 			_viewProps = new MaterialPropertyBlock();
 			_renderer = GetComponent<Renderer>();
 			_renderer.SetPropertyBlock(_viewProps);
 			CheckInit();
+			UpdateFlowUnits();
 			StartCoroutine(Repeater());
 		}
 		IEnumerator Repeater() {
@@ -44,7 +70,7 @@ namespace DistanceFieldSystem {
 				yield return new WaitForSeconds(interval);
 
 				CheckInit();
-				_points.Update(points, targetCamera);
+				_points.Update(PointData, targetCamera);
 				_points.SetData(distMat);
 				SetData(distMat);
 				Graphics.Blit(null, _distTex, distMat, 0);
@@ -76,11 +102,11 @@ namespace DistanceFieldSystem {
 
 			if (_distTex == null || _distTex.width != width || _distTex.height != height) {
 				Release();
-				_distTex = new RenderTexture(width, height, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+				_distTex = new RenderTexture(width, height, 0, RenderTextureFormat.RGFloat, RenderTextureReadWrite.Linear);
 				_distTex.filterMode = FilterMode.Bilinear;
 				_distTex.wrapMode = TextureWrapMode.Clamp;
 				_distTex.antiAliasing = (QualitySettings.antiAliasing == 0 ? 1 : QualitySettings.antiAliasing);
-				_viewProps.SetTexture(ShaderConsts.PROP_DIST_TEXTURE, _distTex);
+				//_viewProps.SetTexture(ShaderConsts.PROP_DIST_TEXTURE, _distTex);
 
 				_normTex = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 				_normTex.filterMode = FilterMode.Bilinear;
@@ -92,6 +118,7 @@ namespace DistanceFieldSystem {
 			}
 			if (_points == null) {
 				_points = new PointService(pointCapacity);
+				UpdatePoints();
 			}
 		}
 		void SetData(Material m) {
@@ -103,66 +130,78 @@ namespace DistanceFieldSystem {
 
 			var r = Mathf.Sqrt(width * height);
 			switch (heightMode) {
-			case HeightModeEnum.Metaball:
-				m.EnableKeyword(ShaderConsts.KEY_FIELD_METABALL);
-				m.SetFloat(ShaderConsts.PROP_DIST_SCALE, 1f * r);
-				break;
 			default:
 				m.EnableKeyword(ShaderConsts.KEY_FIELD_DISTANCE);
 				m.SetFloat(ShaderConsts.PROP_DIST_SCALE, 5f / r);			
 				break;
+			case HeightModeEnum.Metaball:
+				m.EnableKeyword(ShaderConsts.KEY_FIELD_METABALL);
+				m.SetFloat(ShaderConsts.PROP_DIST_SCALE, 1f * r);
+				break;
 			}
 
 			switch (generateTexMode) {
-			case GenerateTexModeEnum.Normal:
-				m.EnableKeyword(ShaderConsts.KEY_GENERATE_NORMAL);
-				break;
 			default:
 				m.EnableKeyword(ShaderConsts.KEY_GENERATE_TANGENT);
+				break;
+			case GenerateTexModeEnum.Normal:
+				m.EnableKeyword(ShaderConsts.KEY_GENERATE_NORMAL);
 				break;
 			}
 		}
 		void SetViewMode() {
 			switch (debugMode) {
+			default:
+				_renderer.enabled = false;
+				break;
 			case DebugModeEnum.Debug:
 				_renderer.enabled = true;
 				FitCamera();
 				break;
-			default:
-				_renderer.enabled = false;
-				break;
 			}
 
 			switch (viewMode) {
+			default:
+				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(1, 0, 0, 0));
+				break;
 			case ViewModeEnum.Height:
 				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(0, 1, 0, 0));
 				break;
-			case ViewModeEnum.LIC:
+			case ViewModeEnum.Distance:
 				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(0, 0, 1, 0));
 				break;
 			case ViewModeEnum.Flow:
 				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(0, 0, 0, 1));
 				break;
-			default:
-				_viewProps.SetVector(ShaderConsts.PROP_VIEW_FILTER, new Vector4(1, 0, 0, 0));
-				break;
 			}
 
 			switch (normalTexMode) {
-			case NormalTexModeEnum.RenderTex:
-				_viewProps.SetTexture(ShaderConsts.PROP_NORM_TEXTURE, _normTex);
-				break;
 			default:
 				_viewProps.SetTexture(ShaderConsts.PROP_NORM_TEXTURE, _normTex2D);
+				break;
+			case NormalTexModeEnum.RenderTex:
+				_viewProps.SetTexture(ShaderConsts.PROP_NORM_TEXTURE, _normTex);
 				break;
 			}
 		}
 		void FitCamera() {
-			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - 1e-2f);
+			var posViewport = new Vector3 (0.5f, 0.5f, targetCamera.farClipPlane - targetCamera.nearClipPlane);
 			transform.position = targetCamera.ViewportToWorldPoint (posViewport);
 			transform.rotation = targetCamera.transform.rotation;
 			var size = 2f * targetCamera.orthographicSize;
 			transform.localScale = new Vector3 (size * targetCamera.aspect, size, 1f);
+		}
+		void UpdateFlowUnits() {
+			_dx_dpx = 2f * targetCamera.orthographicSize  / targetCamera.pixelHeight;
+		}
+		Transform[] GeneratePoints(Transform root) {
+			var points = new System.Collections.Generic.LinkedList<Transform>();
+			foreach (var node in root.GetComponentsInChildren<Transform>())
+				if (node.childCount == 0 && node != root)
+					points.AddLast(node);
+			var result = new Transform[points.Count];
+			points.CopyTo(result, 0);
+			return result;
 		}
 		void Release() {
 			if (_distTex != null) {

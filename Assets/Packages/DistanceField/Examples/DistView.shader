@@ -1,6 +1,5 @@
 ﻿Shader "Unlit/DistView" {
 	Properties {
-		_DistTex ("Dist Texture", 2D) = "white" {}
 		_NormTex ("Norm Texture", 2D) = "white" {}
 		_NoiseTex ("Noise Texture", 2D) = "white" {}
 		_Filter ("Filter", Vector) = (1, 0, 0, 0)
@@ -26,10 +25,8 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			sampler2D _DistTex;
 			sampler2D _NormTex;
 			sampler2D _NoiseTex;
-			float4 _DistTex_ST;
 			float4 _NormTex_ST;
 			float4 _NoiseTex_ST;
 			float4 _NormTex_TexelSize;
@@ -39,19 +36,19 @@
 			v2f vert (appdata v) {
 				v2f o;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _DistTex);
+				o.uv = TRANSFORM_TEX(v.uv, _NormTex);
 				return o;
 			}
 			
 			float4 frag (v2f i) : SV_Target {
 				float3 d = 0;
 			
-				float cd = tex2D(_DistTex, i.uv).x;
-				float2 cn = tex2D(_NormTex, i.uv).xy;
+				float4 c = tex2D(_NormTex, i.uv);
+				float2 cn = c.xy;
 				
-				d += float3(_Filter.x * cn, 0);
-				
-				d += _Filter.y * cd;
+				d += _Filter.x * float3(cn, 0);
+				d += _Filter.y * c.z;
+				d += _Filter.z * c.w;
 				
 				float2 n = normalize(2 * (cn - 0.5));
 				float2 v = n * _NoiseTex_TexelSize.xy;
@@ -62,8 +59,6 @@
 					cl += tex2D(_NoiseTex, uv - i * v);
 				}
 				float3 d_lic = saturate(cl / (2 * LOOP_COUNT + 1));
-				d += _Filter.z * d_lic;
-				
 				float3 d_flow = float3(cn, 1 - max(cn.x, cn.y)); //saturate(abs(n.x) * float3(1, 0, 0) + abs(n.y) * float3(0, 1, 0));
 				d += _Filter.w * d_flow * d_lic;
 				

@@ -22,7 +22,7 @@ namespace DistanceFieldSystem {
 				p.transform.localPosition = pos;
 				_points[i] = p.transform;
 			}
-			distField.points = _points;
+			distField.rootOfPointLeaves = transform;
 		}
 		void Update() {
 			transform.localRotation *= Quaternion.Euler(angularVelocity * Time.deltaTime);

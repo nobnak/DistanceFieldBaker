@@ -33,7 +33,7 @@ Material:
       data:
         first:
           name: _Scale
-        second: 1168.0907
+        second: 893.230103
       data:
         first:
           name: PointCount
@@ -42,4 +42,4 @@ Material:
       data:
         first:
           name: ScreenSize
-        second: {r: 1506, g: 906, b: .000664010644, a: .00110375276}
+        second: {r: 1148, g: 695, b: .000871080148, a: .00143884891}
