@@ -5,4 +5,6 @@ Generated 2DTexture holding
 - b : Metaball height
 - a : Distance from nearest point (256 steps)
 
+[Unity Package](DistanceField.unitypackage)
+
 [![Vimeo](thumbnail.jpg)](https://vimeo.com/145768057)
