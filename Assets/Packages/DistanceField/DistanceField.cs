@@ -33,7 +33,7 @@ namespace DistanceFieldSystem {
 		Renderer _renderer;
 		float _dx_dpx;
 
-		public Transform[] PointData { get; private set; }
+		public Transform[] PointData { get; set; }
 
 		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flow, out float distanceWorld) {
 			if (_normTex2D == null) {
