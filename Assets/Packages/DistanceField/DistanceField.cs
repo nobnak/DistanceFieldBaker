@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Events;
+using System.Collections.Generic;
 
 namespace DistanceFieldSystem {
 
@@ -33,7 +34,15 @@ namespace DistanceFieldSystem {
 		Renderer _renderer;
 		float _dx_dpx;
 
-		public Transform[] PointData { get; set; }
+		public List<Transform> PointData { get; set; }
+		public void AddPoint(Transform p) { PointData.Add(p); }
+		public void RemovePoint(Transform p) { PointData.Remove(p); }
+		public void ClearPoint() {
+			foreach (var p in PointData)
+				if (p != null)
+					Destroy(p.gameObject);
+			PointData.Clear();
+		}
 
 		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flow, out float distanceWorld) {
 			if (_normTex2D == null) {
@@ -53,7 +62,10 @@ namespace DistanceFieldSystem {
 				return false;
 			return (0f <= posViewport.x && posViewport.x <= 1f && 0f < posViewport.y && posViewport.y <= 1f);
 		}
-		public void UpdatePoints() { PointData = GeneratePoints(rootOfPointLeaves); }
+		public void UpdatePoints() {
+			PointData.Clear();
+			PointData.AddRange(GeneratePoints(rootOfPointLeaves)); 
+		}
 		public static Vector2 RotateRight(Vector2 t) { return new Vector2(t.y, -t.x); }
 		public static Vector2 RotateLeft(Vector2 n) { return new Vector2(-n.y, n.x); }
 
@@ -61,6 +73,7 @@ namespace DistanceFieldSystem {
 			_viewProps = new MaterialPropertyBlock();
 			_renderer = GetComponent<Renderer>();
 			_renderer.SetPropertyBlock(_viewProps);
+			PointData = new List<Transform>();
 			CheckInit();
 			UpdateFlowUnits();
 			StartCoroutine(Repeater());
