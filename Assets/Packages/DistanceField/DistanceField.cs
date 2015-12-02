@@ -45,7 +45,7 @@ namespace DistanceFieldSystem {
 		}
 
 		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flow, out float distanceWorld) {
-			if (_normTex2D == null) {
+			if (_normTex2D == null || PointData.Count == 0) {
 				flow = default(Vector2);
 				distanceWorld = default(float);
 				return false;
