@@ -24,7 +24,6 @@ namespace DistanceFieldSystem {
 		public GenerateTexModeEnum generateTexMode;
 		public Camera targetCamera;
 		public Material distMat;
-		public Transform rootOfPointLeaves;
 
 		MaterialPropertyBlock _viewProps;
 		RenderTexture _distTex;
@@ -44,36 +43,36 @@ namespace DistanceFieldSystem {
 			PointData.Clear();
 		}
 
-		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flow, out float distanceWorld) {
+		public bool FlowAtViewportPos(Vector2 posViewport, out Vector2 flowViewspace, out float distanceWorld) {
 			if (_normTex2D == null || PointData.Count == 0) {
-				flow = default(Vector2);
+				flowViewspace = default(Vector2);
 				distanceWorld = default(float);
 				return false;
 			}
 			var flowColor = _normTex2D.GetPixelBilinear(posViewport.x, posViewport.y);
-			flow = new Vector2(2f * (flowColor.r - 0.5f), 2f * (flowColor.g - 0.5f));
-			flow.Normalize();
+			flowViewspace = new Vector2(2f * (flowColor.r - 0.5f), 2f * (flowColor.g - 0.5f));
+			flowViewspace.Normalize();
 			distanceWorld = (255f * flowColor.a) * _dx_dpx;
 			return true;
 		}
-		public bool FlowAtWorldPos(Vector2 posWorld, out Vector2 flow, out float distanceWorld) {
+		public bool FlowAtWorldPos(Vector2 posWorld, out Vector2 flowViewspace, out float distanceWorld) {
 			var posViewport = targetCamera.WorldToViewportPoint(posWorld);
-			if (!FlowAtViewportPos(posViewport, out flow, out distanceWorld))
+			if (!FlowAtViewportPos(posViewport, out flowViewspace, out distanceWorld))
 				return false;
 			return (0f <= posViewport.x && posViewport.x <= 1f && 0f < posViewport.y && posViewport.y <= 1f);
 		}
-		public void UpdatePoints() {
-			PointData.Clear();
-			PointData.AddRange(GeneratePoints(rootOfPointLeaves)); 
-		}
 		public static Vector2 RotateRight(Vector2 t) { return new Vector2(t.y, -t.x); }
 		public static Vector2 RotateLeft(Vector2 n) { return new Vector2(-n.y, n.x); }
+		public Vector3 Local2World(Vector3 v) { return targetCamera.transform.TransformDirection(v); }
+		public Vector3 World2Local(Vector3 v) { return targetCamera.transform.InverseTransformDirection(v); }
 
+		void Awake() {
+			PointData = new List<Transform>();
+		}
 		void Start() {
 			_viewProps = new MaterialPropertyBlock();
 			_renderer = GetComponent<Renderer>();
 			_renderer.SetPropertyBlock(_viewProps);
-			PointData = new List<Transform>();
 			CheckInit();
 			UpdateFlowUnits();
 			StartCoroutine(Repeater());
@@ -119,7 +118,6 @@ namespace DistanceFieldSystem {
 				_distTex.filterMode = FilterMode.Bilinear;
 				_distTex.wrapMode = TextureWrapMode.Clamp;
 				_distTex.antiAliasing = (QualitySettings.antiAliasing == 0 ? 1 : QualitySettings.antiAliasing);
-				//_viewProps.SetTexture(ShaderConsts.PROP_DIST_TEXTURE, _distTex);
 
 				_normTex = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 				_normTex.filterMode = FilterMode.Bilinear;
@@ -131,7 +129,6 @@ namespace DistanceFieldSystem {
 			}
 			if (_points == null) {
 				_points = new PointService(pointCapacity);
-				UpdatePoints();
 			}
 		}
 		void SetData(Material m) {

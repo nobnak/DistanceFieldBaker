@@ -164,16 +164,15 @@ MonoBehaviour:
     m_TypeName: DistanceFieldSystem.Texture2DEvent, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
   lod: 2
-  interval: 1
+  interval: 0
   pointCapacity: 64
-  debugMode: 0
+  debugMode: 1
   heightMode: 1
   viewMode: 3
   normalTexMode: 0
   generateTexMode: 0
   targetCamera: {fileID: 721048937}
   distMat: {fileID: 2100000, guid: 5a901c2c39270cc468e1746de172806a, type: 2}
-  rootOfPointLeaves: {fileID: 0}
 --- !u!23 &337972139
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -192,7 +191,9 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_MinimumChartSize: 4
   m_AutoUVMaxDistance: .5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}

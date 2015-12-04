@@ -21,8 +21,8 @@ namespace DistanceFieldSystem {
 				p.transform.SetParent(transform);
 				p.transform.localPosition = pos;
 				_points[i] = p.transform;
+				distField.AddPoint(p.transform);
 			}
-			distField.rootOfPointLeaves = transform;
 		}
 		void Update() {
 			transform.localRotation *= Quaternion.Euler(angularVelocity * Time.deltaTime);
