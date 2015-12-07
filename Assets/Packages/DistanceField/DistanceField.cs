@@ -55,16 +55,21 @@ namespace DistanceFieldSystem {
 			distanceWorld = (255f * flowColor.a) * _dx_dpx;
 			return true;
 		}
-		public bool FlowAtWorldPos(Vector2 posWorld, out Vector2 flowViewspace, out float distanceWorld) {
+		public bool FlowAtWorldPos(Vector3 posWorld, out Vector2 flowViewspace, out float distanceWorld) {
 			var posViewport = targetCamera.WorldToViewportPoint(posWorld);
 			if (!FlowAtViewportPos(posViewport, out flowViewspace, out distanceWorld))
 				return false;
 			return (0f <= posViewport.x && posViewport.x <= 1f && 0f < posViewport.y && posViewport.y <= 1f);
 		}
+		public Vector3 TransformDirection(Vector3 v) {
+			return targetCamera.transform.TransformDirection(v);
+		}
+		public Vector3 InverseTransformDirection(Vector3 v) {
+			return targetCamera.transform.InverseTransformDirection(v);
+		}
+
 		public static Vector2 RotateRight(Vector2 t) { return new Vector2(t.y, -t.x); }
 		public static Vector2 RotateLeft(Vector2 n) { return new Vector2(-n.y, n.x); }
-		public Vector3 Local2World(Vector3 v) { return targetCamera.transform.TransformDirection(v); }
-		public Vector3 World2Local(Vector3 v) { return targetCamera.transform.InverseTransformDirection(v); }
 
 		void Awake() {
 			PointData = new List<Transform>();
